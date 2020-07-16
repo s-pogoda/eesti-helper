@@ -13,11 +13,11 @@ db.createUser({
 
 })
 
-db.createCollection("verbs", {
+db.createCollection("words", {
 	validator: {
 		$jsonSchema: {
 			bsonType: "object",
-			required: [ "maInfinitive", "daInfinitive", "meForm", "translation"],
+			required: [ "firstCase", "secondCase", "thirdCase", "translation", "type"],
 			properties: {
 				maInfinitive: {
 					bsonType: "string",
@@ -35,6 +35,10 @@ db.createCollection("verbs", {
 					bsonType: "string",
 					description: "must be a string and is required"
 				},
+				type: {
+					enum: ["tegusõna", "nimisõna", "omadussõna", "asesõna"],
+					description: "can only be one of the enum"
+				},
 				failed: {
 					bsonType: "bool",
 					description: "must be a boolean"
@@ -45,35 +49,4 @@ db.createCollection("verbs", {
 	validationAction: "warn"
 })
 
-db.createCollection("nouns", {
-        validator: {
-                $jsonSchema: {
-                        bsonType: "object",
-                        required: [ "first", "second", "third", "translation"],
-                        properties: {
-                                first: {
-                                        bsonType: "string",
-                                        description: "must be a string and is required"
-                                },
-                                second: {
-                                        bsonType: "string",
-                                        description: "must be a string and is required"
-                                },
-                                third: {
-                                        bsonType: "string",
-                                        description: "must be a string and is required"
-                                },
-				translation: {
-                                        bsonType: "string",
-                                        description: "must be a string and is required"
-                                },
-				failed: {
-                                        bsonType: "bool",
-                                        description: "must be a boolean"
-                                }
-                        }
-                }
-        }
-})
-
-
+db.words.createIndex({firstCase: 1}, {unique: true})
