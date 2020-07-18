@@ -1,0 +1,7 @@
+{
+    "files.watcherExclude": {
+        "**/node_modules/**": false,
+        "**/node_modules/*/**": true,
+        "/home/metallmermaid/Code/github/eesti-helper/eesti-site/public": true
+    }
+}
