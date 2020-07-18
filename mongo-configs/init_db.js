@@ -46,7 +46,8 @@ db.createCollection("words", {
 			}
 		}
 	},
-	validationAction: "warn"
+	validationLevel: "strict",
+	validationAction: "error"
 })
 
 db.words.createIndex({firstCase: 1}, {unique: true})
