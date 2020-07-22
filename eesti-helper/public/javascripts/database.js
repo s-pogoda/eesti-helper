@@ -3,16 +3,21 @@ const MongoClient = require('mongodb').MongoClient;
 //TODO: update mongoDB config URL
 const configs = require('./configs').mongoUrl;
 
-let client;
+let client, attempts = 0;
 const dbName = 'words';
 
 getDb = (async () => {
-    if( !client ) {
+    if (!client) {
+        if (attempts > 5) {
+            throw new Error("Can't connect to " + configs());
+        }
         try {
-            console.log("Init connection");            
-            client = await MongoClient.connect(configs, { useUnifiedTopology: true });
-        } catch (e) { 
-            return getDb(); 
+            console.log("Init connection " + configs());
+            client = await MongoClient.connect(configs(), { useUnifiedTopology: true });
+            attempts = 0;
+        } catch (e) {
+            attempts++;
+            return getDb();
         }
     }
 
