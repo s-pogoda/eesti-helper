@@ -1,9 +1,25 @@
 const cheerio = require('cheerio');
 const Request = require('request-promise');
+const { each } = require('async');
 const request = Request.defaults({ jar: Request.jar() });
-const parseWordTitles = require('../public/javascripts/configs').parseWordTitles;
 
-const uri = (func, param) => {
+const parseWordTitles = (type) => {
+    switch (type) {
+        case "tegusõna": return {
+            firstCase: "ma-tegevusnimi",
+            secondCase: "da-tegevusnimi",
+            thirdCase: "kindla kõneviisi oleviku ainsuse 1.pööre"
+        };
+
+        default: return {
+            firstCase: "ainsuse nimetav",
+            secondCase: "ainsuse omastav",
+            thirdCase: "ainsuse osastav"
+        };
+    }
+};
+
+const getURI = (func, param) => {
     switch (func) {
         case "findWord":
             return `http://sonaveeb.ee/worddetails/unif/${param}`;
@@ -14,14 +30,14 @@ const uri = (func, param) => {
     }
 };
 
-function getOptions(funcName, param) {
+const getOptions = (funcName, param) => {
     return {
-        uri: uri(funcName, param),
+        uri: getURI(funcName, param),
         transform: function (body) {
             return cheerio.load(body);
         }
     };
-}
+};
 
 async function findTranslation(word) {
     const options = getOptions(findTranslation.name, word);
@@ -56,11 +72,12 @@ async function findWord(wordId) {
         const $ = await request(options);
 
         let word = { failed: false };
-        word.type = $('.my-1').text();
+        word.type = $('.my-1').map((i, e) => { return $(e).text(); }).get().join();
 
         const cases = parseWordTitles(word.type);
         for (const field in cases) {
-            word[field] = $('.morph-word').filter((i, e) => $(e).attr('title').trim().startsWith(cases[field])).text();
+            const _case = $('.morph-word').filter((i, e) => $(e).attr('title').trim().startsWith(cases[field]));
+            word[field] = $(_case[0]).text();
         }
 
         word.translation = await findTranslation(word.firstCase);
