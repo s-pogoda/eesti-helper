@@ -6,9 +6,10 @@ const configs = require('./configs').mongoUrl;
 let client;
 const dbName = 'words';
 
-getDb = ( async() => {
+getDb = (async () => {
     if( !client ) {
         try {
+            console.log("Init connection");            
             client = await MongoClient.connect(configs, { useUnifiedTopology: true });
         } catch (e) { 
             return getDb(); 
