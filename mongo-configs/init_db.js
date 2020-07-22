@@ -19,21 +19,27 @@ db.createCollection("words", {
 			bsonType: "object",
 			required: [ "firstCase", "secondCase", "thirdCase", "translation", "type"],
 			properties: {
-				maInfinitive: {
+				firstCase: {
 					bsonType: "string",
 					description: "must be a string and is required"
 				},
-				daInfinitive: {
+				secondCase: {
 					bsonType: "string",
 					description: "must be a string and is required"
 				},
-				meForm: {
+				thirdCase: {
 					bsonType: "string",
 					description: "must be a string and is required"
 				},
 				translation: {
-					bsonType: "string",
-					description: "must be a string and is required"
+					bsonType: ["array"],
+					minItem: 1,
+					uniqueItems: true,
+					additionalProperties: false,
+					item: {
+						bsonType: "string",
+						description: "must be a string and is required"
+					}
 				},
 				type: {
 					enum: ["tegusõna", "nimisõna", "omadussõna", "asesõna"],
