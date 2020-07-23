@@ -3,21 +3,23 @@ import PropTypes from 'prop-types';
 import { AppBar, Tabs, Tab, Typography, Box } from '@material-ui/core';
 // import { makeStyles } from '@material-ui/core/styles';
 import NewPage from './components/NewPage';
+import ListPage from './components/ListPage';
+import QuizPage from './components/QuizPage';
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
-  return(
-    <Typography 
+  return (
+    <Typography
       component="div"
       role="tabpanel"
       hidden={value !== index}
       id={`action-tabpanel-${index}`}
       aria-labelledby={`action-tab-${index}`}
       {...other}
-      >
-        {value === index && <Box p={3}>{children}</Box>}
-      </Typography>
+    >
+      {value === index && <Box p={3}>{children}</Box>}
+    </Typography>
   );
 }
 
@@ -34,7 +36,7 @@ function a11yProps(index) {
   };
 }
 
-export default function App () {
+export default function App() {
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
@@ -51,16 +53,20 @@ export default function App () {
           variant="fullWidth"
           aria-label="action tabs example"
         >
-          <Tab label="Add" {...a11yProps(0)}/>
-          <Tab label="List" {...a11yProps(1)}/>
-          <Tab label="Quiz" {...a11yProps(2)}/>
+          <Tab label="Add" {...a11yProps(0)} />
+          <Tab label="List" {...a11yProps(1)} />
+          <Tab label="Quiz" {...a11yProps(2)} />
         </Tabs>
       </AppBar>
       <TabPanel index={0} value={value}>
         <NewPage />
       </TabPanel>
-      <TabPanel index={1} value={value}>List of learned words</TabPanel>
-      <TabPanel index={2} value={value}>Quiz</TabPanel>
+      <TabPanel index={1} value={value}>
+        <ListPage />
+      </TabPanel>
+      <TabPanel index={2} value={value}>
+        <QuizPage />
+      </TabPanel>
     </div>
-    );
+  );
 }

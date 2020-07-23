@@ -1,46 +1,63 @@
 import React from 'react';
-import { Grid, Table, TableBody, TableRow, TableCell, Button } from '@material-ui/core';
-import Word from './Word';
+import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import { Grid, List, Button, Snackbar, ListItem, ListItemText, TextField, ListItemIcon, Typography } from '@material-ui/core';
+
+import request from '../requests/backend-request';
 
 function NewPage() {
 
     const [words, setWords] = React.useState([]);
 
+    const textInput = React.useRef(null);
+
     const handleNewWord = React.useCallback(
-        (state) => {
-            console.log(state);
-            setWords((prev) => [...prev, state]);
+        (event) => {
+            if (event.keyCode === 13) {
+                const value = event.target.value;
+                setWords((prev) => [...prev, value]);
+                setTimeout(() => {
+                    textInput.current.value = null;
+                }, 300);
+            }
         },
-        [setWords]
-    );
+        [setWords]);
+
+    const handleSaveClick = React.useCallback((event) => {
+        try {
+            request.insertMany(words);
+            setWords([]);
+        } catch (e) {
+            console.error(e.message);
+        }
+    }, [words, setWords]);
 
     const renderTable = React.useMemo(() => {
-        return words.map( (row, index) => { return (
-                <TableRow key={index}>
-                    <TableCell align="left">{row.firstCase}</TableCell>
-                    <TableCell align="left">{row.secondCase}</TableCell>
-                    <TableCell align="left">{row.thirdCase}</TableCell>
-                    <TableCell align="left">{row.translation}</TableCell>
-                </TableRow>
-            )});
+        return words.map((row, index) => {
+            return (
+                <ListItem key={index}>
+                    <ListItemIcon><AddCircleOutlineIcon color="primary" /></ListItemIcon>
+                    <ListItemText align="left" primary={<Typography variant="body1" color="primary">{row}</Typography>} />
+                </ListItem>
+            )
+        });
     }, [words]);
 
     return (
         <div>
             <Grid container>
-                <Word onSubmit={handleNewWord}></Word>                
-                <Grid item xs={10}>
-                    <Table>
-                        <TableBody>{renderTable}</TableBody>
-                    </Table>
+                <Grid item xs={12}>
+                    <TextField inputRef={textInput} label="MA-Infinitive / 1st Case" onKeyDown={handleNewWord} />
                 </Grid>
                 <Grid item xs={12}>
-                    <Button variant="contained" color="primary">Save</Button>
+                    <List>{renderTable}</List>
+                </Grid>
+                <Grid item xs={12}>
+                    <Button variant="contained" color="primary" onClick={handleSaveClick}>Save</Button>
                 </Grid>
             </Grid>
-            
+            <Snackbar></Snackbar>
         </div>
-        );
+    );
 }
 
 export default NewPage;
