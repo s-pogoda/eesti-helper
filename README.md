@@ -1,5 +1,6 @@
 # eesti-helper
-Check the spelling of learned Estonian word.
+Check the spelling of learned Estonian words in three cases.
+
 Currently works with rus translation.
 
 ## Goal
@@ -12,7 +13,8 @@ All words information taken from the EKI dictionaries:
 - [EVS Estonian-Russian dictionary](http://portaal.eki.ee/dict/evs/) : word translation
 
 ## Installation
-For installation you need had `docker` and `docker-compose` installed in your PC.
+For installation you need have `docker` and `docker-compose` be installed in your PC.
+
 Build and deployment command in root directory:
 ```
 docker-compose up -d
@@ -21,6 +23,6 @@ That's all, visit http://localhost:8080 to start use it.
 
 ## Usage
 UI contains 3 tabs:
-- ADD : where you can add all your new learned words
-- LIST: show list of all added words
-- QUIZ: check spelling of learned words
+- ADD : add list of learned Estonian words
+- LIST: show all added words in their 3 main cases and translation
+- QUIZ: check spelling of the learned words in 3 cases
