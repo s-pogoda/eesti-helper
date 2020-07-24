@@ -1,6 +1,5 @@
 const MongoClient = require('mongodb').MongoClient;
 
-//TODO: update mongoDB config URL
 const configs = require('./configs').mongoUrl;
 
 let client, attempts = 0;

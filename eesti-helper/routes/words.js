@@ -9,30 +9,29 @@ const dictionary = require('./dictionary');
 router.post('/insert', async (req, res) => {
     const _list = req.body;
 
+    const _words = [], _fails = [];
     try {
-
-        const _words = [];
         await Promise.all(_list.map(async (name) => {
-            const word = await dictionary(name);
-            _words.push(word);
+            try {
+                const word = await dictionary(name);
+                _words.push(word);
+            } catch (e) {
+                _fails.push(name);
+            }
         }));
 
         const _db = await db();
         const _collection = _db.collection('words');
         await _collection.insertMany(_words, { ordered: false });
-        res.status(200).send();
+        res.status(200).send(_fails);
 
     } catch (e) {
         console.error("ERROR: " + e.message);
+        //TODO: re-think errors handling
+        let status = e.message.includes('E11000 duplicate key error collection') ? 200 : 500;
+        status = e.message.includes('404') ? 404 : status;
 
-        if (e.message.includes('E11000 duplicate key error collection')) {
-            res.status(200).send();
-        }
-        if (e.message.includes('404')) {
-            res.status(404).send();
-        } else {
-            res.status(500).send();
-        }
+        res.status(status).send(_fails);
     }
 });
 

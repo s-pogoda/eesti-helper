@@ -4,4 +4,4 @@ module.exports = {
         const port = process.env.MONGO_PORT || "27017";
         return `mongodb://${host}:${port}`;
     }
-}
+};

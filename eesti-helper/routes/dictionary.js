@@ -1,22 +1,21 @@
 const cheerio = require('cheerio');
 const Request = require('request-promise');
-const { each } = require('async');
 const request = Request.defaults({ jar: Request.jar() });
 
 const parseWordTitles = (type) => {
-    switch (type) {
-        case "tegusõna": return {
+    if (type.includes("tegusõna")) {
+        return {
             firstCase: "ma-tegevusnimi",
             secondCase: "da-tegevusnimi",
             thirdCase: "kindla kõneviisi oleviku ainsuse 1.pööre"
         };
-
-        default: return {
-            firstCase: "ainsuse nimetav",
-            secondCase: "ainsuse omastav",
-            thirdCase: "ainsuse osastav"
-        };
     }
+
+    return {
+        firstCase: "ainsuse nimetav",
+        secondCase: "ainsuse omastav",
+        thirdCase: "ainsuse osastav"
+    };
 };
 
 const getURI = (func, param) => {
@@ -44,19 +43,10 @@ async function findTranslation(word) {
 
     try {
         const $ = await request(options);
-        const definitions = [];
-        $('.m').each(
-            (i, e) => {
-                // find definitions without prefixes and suffixes
-                if ($(e).text().trim() === word)
-                    definitions.push($(e).parent());
-            }
-        );
+        // find definitions without prefixes and suffixes
+        const definitions = $('.m').filter((i, e) => $(e).text().trim() === word).get();
 
-        const list = [];
-        $(definitions[0]).find('.x').each(
-            (i, e) => list.push($(e).text().trim())
-        );
+        const list = $(definitions[0]).parent().find('.x').map((i, e) => $(e).text().trim()).get();
 
         // return only unique values
         return [...new Set(list)];
@@ -79,8 +69,8 @@ async function findWord(wordId) {
             const _case = $('.morph-word').filter((i, e) => $(e).attr('title').trim().startsWith(cases[field]));
             word[field] = $(_case[0]).text();
         }
-
         word.translation = await findTranslation(word.firstCase);
+
         return word;
     } catch (e) {
         throw new Error("Can't generate word: " + e.message);
