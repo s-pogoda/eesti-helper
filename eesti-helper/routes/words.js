@@ -16,6 +16,7 @@ router.post('/insert', async (req, res) => {
                 const word = await dictionary(name);
                 _words.push(word);
             } catch (e) {
+                console.error(e.message);
                 _fails.push(name);
             }
         }));

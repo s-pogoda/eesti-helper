@@ -38,55 +38,90 @@ const getOptions = (funcName, param) => {
     };
 };
 
+const getDefinitionBlock = ($, word) => {
+    let definitions = $('.m').filter((i, e) => $(e).text().trim() === word).get();
+    if (!definitions.length) {
+        definitions = $('.d').filter((i, e) => $(e).text().trim() === word).get();
+    }
+    return $(definitions[0]).parent();
+};
+
+const validateCases = (word) => {
+    if (word.firstCase === "" || word.secondCase === "" || word.thirdCase === "")
+        throw new Error("Cases validation failed. " + JSON.stringify(word));
+}
+
 async function findTranslation(word) {
-    const options = getOptions(findTranslation.name, word);
+    const _options = getOptions(findTranslation.name, word);
 
     try {
-        const $ = await request(options);
+        const $ = await request(_options);
         // find definitions without prefixes and suffixes
-        const definitions = $('.m').filter((i, e) => $(e).text().trim() === word).get();
+        const _definition = getDefinitionBlock($, word);
 
-        const list = $(definitions[0]).parent().find('.x').map((i, e) => $(e).text().trim()).get();
+        if (_definition) {
+            const _list = $(_definition).find('.x').map((i, e) => $(e).text().trim()).get();
+            // return only unique values
+            return [...new Set(_list)];
 
-        // return only unique values
-        return [...new Set(list)];
+        } else
+            throw new Error("word translation not found");
     } catch (e) {
         throw new Error("Can't get word translation correctly: " + e.message);
     }
 }
 
-async function findWord(wordId) {
-    const options = getOptions(findWord.name, wordId);
+async function findWord(id, words, isComplex) {
+    const _options = getOptions(findWord.name, id);
 
     try {
-        const $ = await request(options);
+        const $ = await request(_options);
 
-        let word = { failed: false };
-        word.type = $('.my-1').map((i, e) => { return $(e).text(); }).get().join();
+        let _word = { failed: false };
+        _word.type = $('.my-1').map((i, e) => { return $(e).text(); }).get().join();
 
-        const cases = parseWordTitles(word.type);
-        for (const field in cases) {
-            const _case = $('.morph-word').filter((i, e) => $(e).attr('title').trim().startsWith(cases[field]));
-            word[field] = $(_case[0]).text();
+        const _cases = parseWordTitles(_word.type);
+        for (const field in _cases) {
+            const _case = $('.morph-word').filter((i, e) => $(e).attr('title').trim().startsWith(_cases[field]));
+
+            if (field === "thirdCase") {
+                _word[field] = isComplex ? [$(_case[0]).text(), words[0]].join(' ') : $(_case[0]).text();
+            } else {
+                _word[field] = isComplex ? [words[0], $(_case[0]).text()].join(' ') : $(_case[0]).text();
+            }
         }
-        word.translation = await findTranslation(word.firstCase);
+        validateCases(_word);
+        _word.translation = await findTranslation(_word.firstCase);
 
-        return word;
+        return _word;
     } catch (e) {
         throw new Error("Can't generate word: " + e.message);
     }
 }
 
-async function searchInDictionary(word) {
-    const options = getOptions(searchInDictionary.name, word);
+async function searchInDictionary(term) {
 
+    let _options;
+
+    // http://sonaveeb.ee not always include three cases for complex terms (that contain 2 words)
+    // in case with complex word we need to find three main cases 
+    // only for changeble word, which is on _words[1] position 
+    let _complexity = false;
+    const _words = term.split(' ');
+
+    if (_words.length > 1) {
+        _options = getOptions(searchInDictionary.name, _words[1]);
+        _complexity = !_complexity;
+    } else {
+        _options = getOptions(searchInDictionary.name, term);
+    }
     try {
-        const $ = await request(options);
 
-        const wordId = $('input[name=word-id]').attr('value');
+        const $ = await request(_options);
+        const _id = $('input[name=word-id]').attr('value');
 
-        if (wordId !== undefined) {
-            return await findWord(wordId);
+        if (_id) {
+            return await findWord(_id, _words, _complexity);
         } else {
             throw new Error("404 - Not Found.");
         }
