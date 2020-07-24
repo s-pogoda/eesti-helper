@@ -4,7 +4,7 @@ Check the spelling of learned Estonian words in three cases.
 Currently works with rus translation.
 
 ## Goal
-- sinplify the study of words spelling
+- simplify the study of words spelling
 - learn React basics
 
 ## Dependencies
@@ -23,6 +23,6 @@ That's all, visit http://localhost:8080 to start use it.
 
 ## Usage
 UI contains 3 tabs:
-- ADD : add list of learned Estonian words
-- LIST: show all added words in their 3 main cases and translation
-- QUIZ: check spelling of the learned words in 3 cases
+- ***ADD*** : add list of learned Estonian words
+- ***LIST*** : show all added words in their 3 main cases and translation
+- ***QUIZ*** : check spelling of the learned words in 3 cases

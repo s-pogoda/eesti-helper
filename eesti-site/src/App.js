@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { AppBar, Tabs, Tab, Typography, Box } from '@material-ui/core';
-// import { makeStyles } from '@material-ui/core/styles';
-import NewPage from './components/NewPage';
+import AddPage from './components/AddPage';
 import ListPage from './components/ListPage';
 import QuizPage from './components/QuizPage';
 
@@ -59,7 +58,7 @@ export default function App() {
         </Tabs>
       </AppBar>
       <TabPanel index={0} value={value}>
-        <NewPage />
+        <AddPage />
       </TabPanel>
       <TabPanel index={1} value={value}>
         <ListPage />

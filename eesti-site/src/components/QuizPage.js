@@ -11,7 +11,7 @@ export default function QuizPage() {
 
     const [state, setState] = React.useState({
         event: "CONFIG",
-        reqOpts: { limit: 20, type: "" },
+        reqOpts: { limit: 0, type: "" },
         words: [],
         answers: {},
         failed: []
@@ -32,20 +32,13 @@ export default function QuizPage() {
             getData();
         }
 
-        // return () => setState( { 
-        //     event: "CONFIG", 
-        //     reqOpts: {limit: 20, type: ""}, 
-        //     words:[], 
-        //     answers: {}, 
-        //     failed:[] 
-        // } );
     }, [state.event, state.reqOpts, setState]
     );
 
     const handleStart = React.useCallback(
         (event) => {
-            setState((prev) => ({ ...prev, reqOpts: { ...prev.reqOpts, type: event } }));
-        }, []
+            setState((prev) => ({ ...prev, reqOpts: event }));
+        }, [setState]
     );
 
     const handleWordSubmit = React.useCallback(
@@ -55,7 +48,6 @@ export default function QuizPage() {
         }, [setState]
     );
 
-    //TODO: change {failed: true} for failed state.words ...
     const handleQuizResult = React.useCallback(
         (event) => {
             async function requestResult() {
@@ -71,15 +63,9 @@ export default function QuizPage() {
         }, [state, setState]
     );
 
-    // const handleRetakeQuiz = React.useCallback(
-    //     (event) => {
-    //         setState((prev) => ({...prev, event: "QUIZ", failed: []}));
-    //     }, []
-    // );
-
     const generateComponent = React.useMemo(() => {
         switch (state.event) {
-            // 1 : Add quiz words
+            // Fill quiz words
             case "QUIZ": {
                 if (!state.words.length) {
                     return (<Typography variant="h3" color="primary">Request have 0 matches</Typography>);
@@ -97,7 +83,7 @@ export default function QuizPage() {
                 </Typography>);
             }
 
-            // 2 : Show quiz result
+            // Show quiz result
             case "RESULT": {
                 const passed = state.words.length - state.failed.length;
 
@@ -109,7 +95,7 @@ export default function QuizPage() {
                 </Typography>);
             }
 
-            // 0 : Pre-quiz condition
+            // Pre-quiz condition
             default: {
                 return (<PreQuiz onSubmit={handleStart}></PreQuiz>);
             }

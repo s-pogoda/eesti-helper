@@ -20,7 +20,7 @@ async function find(opts) {
             query = { failed: true };
             break;
         case "latest":
-            filter = { sort: { _id: -1 }, limit: opts[1] };
+            filter = { sort: { _id: -1 }, limit: parseInt(opts[1]) };
             break;
         default: break;
     }

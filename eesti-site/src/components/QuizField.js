@@ -6,9 +6,9 @@ export default function QuizField({ id, word, isVerb, onSubmit }) {
 
     const [state, setState] = React.useState({ id: '', data: { firstCase: '', secondCase: '', thirdCase: '' } });
 
-    const error_first = state.firstCase === '';
-    const error_second = state.secondCase === '';
-    const error_third = state.thirdCase === '';
+    const error_first = state.data.firstCase === '';
+    const error_second = state.data.secondCase === '';
+    const error_third = state.data.thirdCase === '';
 
     React.useEffect(
         () => {
@@ -29,12 +29,10 @@ export default function QuizField({ id, word, isVerb, onSubmit }) {
         }, [setState]
     );
 
-    const handleTabEnterPress = React.useCallback(
+    const handleOnBlur = React.useCallback(
         (event) => {
-            // 9: Tab key code, 13: Enter key code
-            if (event.keyCode === 9 || event.keyCode === 13) {
-                if (!error_first && !error_second && !error_third)
-                    onSubmit(state);
+            if (!error_first && !error_second && !error_third) {
+                onSubmit(state);
             }
         }, [error_first, error_second, error_third, state, onSubmit]
     );
@@ -52,6 +50,7 @@ export default function QuizField({ id, word, isVerb, onSubmit }) {
                     value={state.data.firstCase}
                     label={isVerb ? "MA-Infinitive" : "1st Case"}
                     onChange={handleOnChange}
+                    onBlur={handleOnBlur}
                     error={error_first}
                 />
             </Grid>
@@ -63,6 +62,7 @@ export default function QuizField({ id, word, isVerb, onSubmit }) {
                     value={state.data.secondCase}
                     label={isVerb ? "DA-Infinitive" : "2nd Case"}
                     onChange={handleOnChange}
+                    onBlur={handleOnBlur}
                     error={error_second}
                 />
             </Grid>
@@ -74,7 +74,7 @@ export default function QuizField({ id, word, isVerb, onSubmit }) {
                     value={state.data.thirdCase}
                     label={isVerb ? "'ME'-form" : "3rd Case"}
                     onChange={handleOnChange}
-                    onKeyDown={handleTabEnterPress}
+                    onBlur={handleOnBlur}
                     error={error_third}
                 />
             </Grid>
