@@ -15,7 +15,7 @@ services:
 
   eesti-backend:
     build: ./eesti-helper
-    image: eesti-backend:0.1
+    image: eesti-backend:${BACKEND_TAG}
     environment:
       - MONGO_HOST=words-db
       - MONGO_PORT=27017
@@ -28,7 +28,7 @@ services:
 
   eesti-front:
     build: ./eesti-site
-    image: eesti-front:0.1
+    image: eesti-front:${FRONTEND_TAG}
     ports:
       - 8080:80
     networks:
