@@ -16,6 +16,9 @@ async function quizResult(words, answers) {
 async function find(opts) {
     let query = {}, filter = {};
     switch (opts[0]) {
+        case "all":
+            filter = { sort: { _id: -1 } };
+            break;
         case "failed":
             query = { failed: true };
             break;

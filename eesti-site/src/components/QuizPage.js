@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Button, List, Typography } from '@material-ui/core';
+import { Grid, Button, List, Typography } from '@material-ui/core';
 import PreQuiz from './PreQuiz';
 import QuizField from './QuizField';
 import ResultList from './ResultList';
@@ -87,12 +87,18 @@ export default function QuizPage() {
             case "RESULT": {
                 const passed = state.words.length - state.failed.length;
 
-                return (<Typography component="div">
-                    <Typography variant="h2" color="primary">
-                        {passed} / {state.words.length}
-                    </Typography>
-                    <ResultList words={state.failed} answers={state.answers} />
-                </Typography>);
+                return (<Grid container align="center" >
+                    <Grid item xs={12}>
+                        <Typography variant="h2" color="primary">
+                            {passed} / {state.words.length}
+                        </Typography>
+                    </Grid>
+                    {passed === state.words.length ?
+                        <Grid item xs={12}>
+                            <Typography variant="h2" color="primary">Good work!</Typography>
+                        </Grid>
+                        : <ResultList words={state.failed} answers={state.answers} />}
+                </Grid>);
             }
 
             // Pre-quiz condition
