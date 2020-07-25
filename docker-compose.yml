@@ -26,9 +26,9 @@ services:
         aliases:
           - eesti
 
-  eesti-front:
+  eesti-frontend:
     build: ./eesti-site
-    image: eesti-front:${FRONTEND_TAG}
+    image: eesti-frontend:${FRONTEND_TAG}
     ports:
       - 8080:80
     networks:
