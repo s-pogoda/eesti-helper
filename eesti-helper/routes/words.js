@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const ObjectID = require('mongodb').ObjectID;
-// const cors = require('cors');
 
 const db = require('../public/javascripts/database');
 const dictionary = require('./dictionary');
@@ -13,7 +12,7 @@ router.post('/insert', async (req, res) => {
     try {
         await Promise.all(_list.map(async (name) => {
             try {
-                const word = await dictionary(name);
+                const word = await dictionary(name.replace(/\s+/g, " "));
                 _words.push(word);
             } catch (e) {
                 console.error(e.message);
@@ -21,10 +20,13 @@ router.post('/insert', async (req, res) => {
             }
         }));
 
-        const _db = await db();
-        const _collection = _db.collection('words');
-        await _collection.insertMany(_words, { ordered: false });
-        res.status(200).send(_fails);
+        if (_words.length) {
+            const _db = await db();
+            const _collection = _db.collection('words');
+            await _collection.insertMany(_words, { ordered: false });
+            res.status(200).send(_fails);
+        } else
+            throw new Error(`404 - Not fould ${_fails.join()}`);
 
     } catch (e) {
         console.error("ERROR: " + e.message);
@@ -32,7 +34,7 @@ router.post('/insert', async (req, res) => {
         let status = e.message.includes('E11000 duplicate key error collection') ? 200 : 500;
         status = e.message.includes('404') ? 404 : status;
 
-        res.status(status).send(_fails);
+        res.status(status).send();
     }
 });
 
@@ -62,9 +64,9 @@ router.post('/quiz-result', async (req, res) => {
     //compare user answers with correct values
     for (const id in _answers) {
         const word = _words.find((item) => item._id === id);
-        if (word.firstCase !== _answers[id].firstCase
-            || word.secondCase !== _answers[id].secondCase
-            || word.thirdCase !== _answers[id].thirdCase) {
+        if (word.firstCase !== _answers[id].firstCase.replace(/\s+/g, " ")
+            || word.secondCase !== _answers[id].secondCase.replace(/\s+/g, " ")
+            || word.thirdCase !== _answers[id].thirdCase.replace(/\s+/g, " ")) {
             word.failed = true;
             _failedIds.push(ObjectID(word._id));
             _failed.push(word);

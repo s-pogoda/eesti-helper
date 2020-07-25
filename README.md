@@ -15,7 +15,7 @@ All words information taken from the EKI dictionaries:
 ## Installation
 For installation you need have `docker` and `docker-compose` be installed in your PC.
 
-Build and deployment command in root directory:
+Build and deployment command in project root directory:
 ```
 docker-compose up -d
 ```
@@ -23,6 +23,6 @@ That's all, visit http://localhost:8080 to start use it.
 
 ## Usage
 UI contains 3 tabs:
-- ***ADD*** : add list of learned Estonian words
-- ***LIST*** : show all added words in their 3 main cases and translation
-- ***QUIZ*** : check spelling of the learned words in 3 cases
+- **ADD** : add list of learned Estonian words
+- **LIST** : show all added words in their 3 main cases and translation
+- **QUIZ** : check spelling of the learned words in 3 cases

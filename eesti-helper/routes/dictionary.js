@@ -39,16 +39,16 @@ const getOptions = (funcName, param) => {
 };
 
 const getDefinitionBlock = ($, word) => {
-    let definitions = $('.m').filter((i, e) => $(e).text().trim() === word).get();
+    let definitions = $('.m').filter((i, e) => $(e).text().replace(/\+/g, '').trim() === word).get();
     if (!definitions.length) {
-        definitions = $('.d').filter((i, e) => $(e).text().trim() === word).get();
+        definitions = $('.d').filter((i, e) => $(e).text().replace(/\+/g, '').trim() === word).get();
     }
     return $(definitions[0]).parent();
 };
 
-const validateCases = (word) => {
-    if (word.firstCase === "" || word.secondCase === "" || word.thirdCase === "")
-        throw new Error("Cases validation failed. " + JSON.stringify(word));
+const validate = (word) => {
+    if (word.firstCase === "" || word.secondCase === "" || word.thirdCase === "" || word.translation === [])
+        throw new Error("Validation failed. " + JSON.stringify(word));
 }
 
 async function findTranslation(word) {
@@ -90,9 +90,9 @@ async function findWord(id, words, isComplex) {
                 _word[field] = isComplex ? [words[0], $(_case[0]).text()].join(' ') : $(_case[0]).text();
             }
         }
-        validateCases(_word);
         _word.translation = await findTranslation(_word.firstCase);
 
+        validate(_word);
         return _word;
     } catch (e) {
         throw new Error("Can't generate word: " + e.message);
