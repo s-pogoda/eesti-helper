@@ -5,6 +5,10 @@ const ObjectID = require('mongodb').ObjectID;
 const db = require('../public/javascripts/database');
 const dictionary = require('./dictionary');
 
+const prepareInput = (str) => {
+    return str.replace(/\s+/g, " ").trim();
+};
+
 router.post('/insert', async (req, res) => {
     const _list = req.body;
 
@@ -12,7 +16,7 @@ router.post('/insert', async (req, res) => {
     try {
         await Promise.all(_list.map(async (name) => {
             try {
-                const word = await dictionary(name.replace(/\s+/g, " "));
+                const word = await dictionary(prepareInput(name));
                 _words.push(word);
             } catch (e) {
                 console.error(e.message);
@@ -64,9 +68,9 @@ router.post('/quiz-result', async (req, res) => {
     //compare user answers with correct values
     for (const id in _answers) {
         const word = _words.find((item) => item._id === id);
-        if (word.firstCase !== _answers[id].firstCase.replace(/\s+/g, " ")
-            || word.secondCase !== _answers[id].secondCase.replace(/\s+/g, " ")
-            || word.thirdCase !== _answers[id].thirdCase.replace(/\s+/g, " ")) {
+        if (word.firstCase !== prepareInput(_answers[id].firstCase)
+            || word.secondCase !== prepareInput(_answers[id].secondCase)
+            || word.thirdCase !== prepareInput(_answers[id].thirdCase)) {
             word.failed = true;
             _failedIds.push(ObjectID(word._id));
             _failed.push(word);
