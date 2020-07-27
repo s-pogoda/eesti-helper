@@ -19,7 +19,7 @@ Build and deployment command in project root directory:
 ```
 docker-compose up -d
 ```
-That's all, visit http://localhost:8080 to start use it.
+That's all, visit http://localhost:8080 to start work.
 
 ## Usage
 UI contains 3 tabs:

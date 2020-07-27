@@ -66,11 +66,11 @@ router.post('/quiz-result', async (req, res) => {
     const _failed = [], _failedIds = [], _fixedIds = [];
 
     //compare user answers with correct values
-    for (const id in _answers) {
-        const word = _words.find((item) => item._id === id);
-        if (word.firstCase !== prepareInput(_answers[id].firstCase)
-            || word.secondCase !== prepareInput(_answers[id].secondCase)
-            || word.thirdCase !== prepareInput(_answers[id].thirdCase)) {
+    _words.forEach((word) => {
+        const answer = _answers[word._id];
+        if(!answer || word.firstCase !== prepareInput(answer.firstCase)
+        || word.secondCase !== prepareInput(answer.secondCase)
+        || word.thirdCase !== prepareInput(answer.thirdCase)) {
             word.failed = true;
             _failedIds.push(ObjectID(word._id));
             _failed.push(word);
@@ -78,7 +78,7 @@ router.post('/quiz-result', async (req, res) => {
             // if you failed word before, but now not --> change failed status
             if (word.failed) _fixedIds.push(ObjectID(word._id));
         }
-    }
+    });
 
     //update db
     try {

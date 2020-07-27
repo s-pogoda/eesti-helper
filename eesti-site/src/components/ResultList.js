@@ -10,6 +10,7 @@ export default function ResultList({ words, answers }) {
                 <List>
                     {words.map((word) => {
                         const answer = answers[word._id];
+                        const answerText = answer ? `${answer.firstCase} - ${answer.secondCase} - ${answer.thirdCase}` : `${word.translation[0]} - not filled`;
                         return (
                             <ListItem key={word._id}>
                                 <ListItemIcon>
@@ -17,7 +18,7 @@ export default function ResultList({ words, answers }) {
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={<Typography variant="body1" color="error">
-                                        {answer.firstCase} - {answer.secondCase} - {answer.thirdCase}
+                                        {answerText}
                                     </Typography>}
                                     secondary={<Typography variant="body2" color="primary">
                                         {word.firstCase} - {word.secondCase} - {word.thirdCase}

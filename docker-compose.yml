@@ -1,39 +1,45 @@
 version: "3"
 services:
-  words-db:
+  db:
     image: mongo:latest
     volumes:
       - ./mongo-configs/init_db.js:/docker-entrypoint-initdb.d/init_db.js
+      - /opt/eesti-database:/data/db
     environment:
       - MONGO_INITDB_DATABASE=words
-    ports:
-      - 27017:27017
+    expose:
+      - 27017
     networks:
-      default:
+      eesti-internal:
         aliases:
-          - eesti
+          - database
 
   eesti-backend:
-    build: ./eesti-helper
+    build: 
+      context: ./eesti-helper
+      dockerfile: Dockerfile
     image: eesti-backend:${BACKEND_TAG}
     environment:
-      - MONGO_HOST=words-db
+      - MONGO_HOST=database
       - MONGO_PORT=27017
     ports:
       - 8081:3000
     networks:
-      default:
-        aliases:
-          - eesti
+      - eesti-internal
+      - eesti-external
 
   eesti-frontend:
-    build: ./eesti-site
+    build: 
+      context: ./eesti-site
+      dockerfile: Dockerfile
     image: eesti-frontend:${FRONTEND_TAG}
     ports:
       - 8080:80
     networks:
-      default:
-        aliases:
-          - eesti
+      - eesti-external
+
+networks:
+  eesti-external:
+  eesti-internal:
 
 
