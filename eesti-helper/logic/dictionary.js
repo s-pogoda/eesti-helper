@@ -1,6 +1,7 @@
 const cheerio = require('cheerio');
 const Request = require('request-promise');
 const request = Request.defaults({ jar: Request.jar() });
+const getURI = require('../config/configs').getDictionaryURI;
 
 const parseWordTitles = (type) => {
     if (type.includes("tegusõna")) {
@@ -16,17 +17,6 @@ const parseWordTitles = (type) => {
         secondCase: "ainsuse omastav",
         thirdCase: "ainsuse osastav"
     };
-};
-
-const getURI = (func, param) => {
-    switch (func) {
-        case "findWord":
-            return `http://sonaveeb.ee/worddetails/unif/${param}`;
-        case "findTranslation":
-            return `http://www.eki.ee/dict/evs/index.cgi?Q=${encodeURI(param)}&F=M&C06=en`;
-        default:
-            return `http://sonaveeb.ee/search/unif/dlall/dsall/${encodeURI(param)}/1`;
-    }
 };
 
 const getOptions = (funcName, param) => {
@@ -47,7 +37,7 @@ const getDefinitionBlock = ($, word) => {
 };
 
 const validate = (word) => {
-    if (word.firstCase === "" || word.secondCase === "" || word.thirdCase === "" || word.translation === [])
+    if (word.firstCase === "" || word.secondCase === "" || word.thirdCase === "" || !word.translation.length)
         throw new Error("Validation failed. " + JSON.stringify(word));
 }
 

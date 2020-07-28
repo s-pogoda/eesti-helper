@@ -1,6 +1,6 @@
 const MongoClient = require('mongodb').MongoClient;
 
-const configs = require('./configs').mongoUrl;
+const configs = require('../config/configs').mongoUrl;
 
 let client, attempts = 0;
 const dbName = 'words';

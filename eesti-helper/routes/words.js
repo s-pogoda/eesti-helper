@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const ObjectID = require('mongodb').ObjectID;
 
-const db = require('../public/javascripts/database');
-const dictionary = require('./dictionary');
+const db = require('../database/database');
+const dictionary = require('../logic/dictionary');
 
 const prepareInput = (str) => {
     return str.replace(/\s+/g, " ").trim();
@@ -68,9 +68,9 @@ router.post('/quiz-result', async (req, res) => {
     //compare user answers with correct values
     _words.forEach((word) => {
         const answer = _answers[word._id];
-        if(!answer || word.firstCase !== prepareInput(answer.firstCase)
-        || word.secondCase !== prepareInput(answer.secondCase)
-        || word.thirdCase !== prepareInput(answer.thirdCase)) {
+        if (!answer || word.firstCase !== prepareInput(answer.firstCase)
+            || word.secondCase !== prepareInput(answer.secondCase)
+            || word.thirdCase !== prepareInput(answer.thirdCase)) {
             word.failed = true;
             _failedIds.push(ObjectID(word._id));
             _failed.push(word);
