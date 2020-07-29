@@ -28,22 +28,24 @@ function NewPage() {
 
     const handleSaveClick = React.useCallback((event) => {
         async function saveData() {
-            let severity, txt;
-            try {
-                const response = await request.insertMany(state.data);
+            if (state.data.length) {
+                let severity, txt;
+                try {
+                    const response = await request.insertMany(state.data);
 
-                if (response.data.length) {
-                    severity = "warning";
-                    txt = "Saved all, except: " + response.data.join();
-                } else {
-                    severity = "success";
-                    txt = "Successfully saved";
+                    if (response.data.length) {
+                        severity = "warning";
+                        txt = "Saved all, except: " + response.data.join();
+                    } else {
+                        severity = "success";
+                        txt = "Successfully saved";
+                    }
+                } catch (e) {
+                    severity = "error";
+                    txt = "Failed to save: " + e.message;
                 }
-            } catch (e) {
-                severity = "error";
-                txt = "Failed to save: " + e.message;
+                setState({ alert: { open: true, severity: severity, txt: txt }, data: [] });
             }
-            setState({ alert: { open: true, severity: severity, txt: txt }, data: [] });
         }
         saveData();
 

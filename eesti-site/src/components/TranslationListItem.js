@@ -29,7 +29,7 @@ export default function TranslationListItem({ arrayValue }) {
                             <ListItem button >
                                 <ListItemText primary={
                                     <Typography color="primary" >
-                                        {arrayValue.join(", ")}
+                                        {arrayValue.slice(1).join(", ")}
                                     </Typography>} />
                             </ListItem>
                         </Collapse>

@@ -30,7 +30,7 @@ router.post('/insert', async (req, res) => {
             await _collection.insertMany(_words, { ordered: false });
             res.status(200).send(_fails);
         } else
-            throw new Error(`404 - Not fould ${_fails.join()}`);
+            throw new Error(`404 - Not found ${_fails.join()}`);
 
     } catch (e) {
         console.error("ERROR: " + e.message);
