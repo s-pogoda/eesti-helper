@@ -11,7 +11,7 @@ export default function QuizPage() {
 
     const [state, setState] = React.useState({
         event: "CONFIG",
-        reqOpts: { limit: 0, type: "" },
+        reqOpts: { limit: 0, selector: "", type: "" },
         words: [],
         answers: {},
         failed: []
@@ -20,8 +20,8 @@ export default function QuizPage() {
     React.useEffect(() => {
         async function getData() {
             try {
-                if (state.reqOpts.type) {
-                    const response = await request.find([state.reqOpts.type, state.reqOpts.limit]);
+                if (state.reqOpts.selector) {
+                    const response = await request.find([state.reqOpts.selector, state.reqOpts.limit, state.reqOpts.type]);
                     setState((prev) => ({ ...prev, event: "QUIZ", words: response.data }));
                 }
             } catch (e) {

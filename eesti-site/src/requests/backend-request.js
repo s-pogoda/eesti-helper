@@ -9,7 +9,7 @@ async function insertMany(data) {
 }
 
 async function updateTranslation(param, value) {
-    return await axios.post(url + `update-translation/${param}`, {translation: value}, {headers: contentType});
+    return await axios.post(url + `update-translation/${param}`, { translation: value }, { headers: contentType });
 }
 
 //TODO return put
@@ -23,6 +23,9 @@ async function find(opts) {
         case "all":
             filter = { sort: { _id: -1 } };
             break;
+        case "word-type":
+            query = { type: { $regex: opts[2] } };
+            break;
         case "failed":
             query = { failed: true };
             break;
@@ -31,7 +34,6 @@ async function find(opts) {
             break;
         default: break;
     }
-
     return await axios.get(url + "find", { params: { q: query, f: filter } });
 }
 
