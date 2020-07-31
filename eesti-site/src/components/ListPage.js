@@ -8,8 +8,8 @@ export default function ListPage() {
 
     const [state, setState] = React.useState({ data: [] });
 
-    const headers = ["MA-infinitive / 1st Case", "DA-infinitive / 2nd Case", "ME-form / 3rd Case", "Translation"];
-    const columns = ["firstCase", "secondCase", "thirdCase", "translation"];
+    const headers = ["Translation", "MA-infinitive / 1st Case", "DA-infinitive / 2nd Case", "ME-form / 3rd Case"];
+    const columns = ["translation", "firstCase", "secondCase", "thirdCase"];
 
     React.useEffect(() => {
         async function getData() {

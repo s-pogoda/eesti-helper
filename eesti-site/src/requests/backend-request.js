@@ -8,6 +8,10 @@ async function insertMany(data) {
     return await axios.post(url + "insert", data, { headers: contentType });
 }
 
+async function updateTranslation(param, value) {
+    return await axios.post(url + `update-translation/${param}`, {translation: value}, {headers: contentType});
+}
+
 //TODO return put
 async function quizResult(words, answers) {
     return await axios.post(url + "quiz-result", { words: words, answers: answers }, { headers: contentType });
@@ -34,5 +38,6 @@ async function find(opts) {
 export default {
     insertMany,
     quizResult,
-    find
+    find,
+    updateTranslation
 };

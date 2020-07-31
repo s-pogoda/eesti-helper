@@ -1,8 +1,8 @@
 import React from 'react';
-import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import { Grid, List, Collapse, IconButton, Button, ListItem, ListItemText, TextField, ListItemIcon, Typography, Tooltip } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import CloseIcon from '@material-ui/icons/Close';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 import request from '../requests/backend-request';
 
@@ -25,6 +25,11 @@ function NewPage() {
             }
         },
         [setState]);
+
+    const handleRemoveItem = React.useCallback(
+        (index) => {
+            setState((prev) => ({ ...prev, data: prev.data.filter((e, i) => i !== index) }));
+        }, [setState]);
 
     const handleSaveClick = React.useCallback((event) => {
         async function saveData() {
@@ -51,16 +56,16 @@ function NewPage() {
 
     }, [state, setState]);
 
-    const renderTable = React.useMemo(() => {
+    const renderList = React.useMemo(() => {
         return state.data.map((row, index) => {
             return (
-                <ListItem key={index} >
-                    <ListItemIcon><AddCircleOutlineIcon color="primary" /></ListItemIcon>
+                <ListItem key={index} tabIndex={-1} button onClick={() => handleRemoveItem(index)}>
+                    <ListItemIcon><DeleteIcon color="primary" /></ListItemIcon>
                     <ListItemText align="left" primary={<Typography variant="body1" color="primary">{row}</Typography>} />
                 </ListItem>
             )
         });
-    }, [state]);
+    }, [state, handleRemoveItem]);
 
     return (
         <div>
@@ -74,9 +79,10 @@ function NewPage() {
                     </Tooltip>
                 </Grid>
                 <Grid item xs={5} />
-                <Grid item xs={7}>
-                    <List>{renderTable}</List>
+                <Grid item xs={3}>
+                    <List>{renderList}</List>
                 </Grid>
+                <Grid item xs={4} />
                 <Grid item xs={12}>
                     <Button variant="contained" color="primary" onClick={handleSaveClick}>Save</Button>
                 </Grid>
