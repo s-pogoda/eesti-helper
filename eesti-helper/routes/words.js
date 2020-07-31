@@ -58,6 +58,31 @@ router.get('/find', async (req, res) => {
     }
 });
 
+router.post('/update-translation/:id', async (req, res) => {
+    const value = req.body.translation;
+
+    try {
+        const _db = await db();
+        const _collection = _db.collection('words');
+        //TODO: change logic - replace findOne & unshift part
+        const _word = await _collection.findOne({ _id: ObjectID(req.params.id) });
+        _word.translation.unshift(value);
+
+        _collection.updateOne(
+            { _id: ObjectID(req.params.id) },
+            {
+                $set: {
+                    translation: [...new Set(_word.translation)]
+                }
+            });
+        res.status(200).send();
+
+    } catch (e) {
+        console.error(e.message);
+        res.status(500).send();
+    }
+});
+
 router.post('/quiz-result', async (req, res) => {
     // array of origin words
     const _words = req.body.words;
