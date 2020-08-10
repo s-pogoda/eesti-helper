@@ -1,8 +1,6 @@
 import React from 'react';
 import MaterialTable from 'material-table';
-import { Typography } from '@material-ui/core';
 import WordTags from './WordTags';
-
 import request from '../requests/backend-request';
 
 export default function WordTable({ headers, columns, data, tags }) {
@@ -20,35 +18,32 @@ export default function WordTable({ headers, columns, data, tags }) {
 
     React.useEffect(
         () => {
+
+            const _data = data.map(
+                (row) => ({ ...row, key: row._id, translation: row.translation[0] })
+            );
+
             // create expected columns format
             const _cols = [];
             for (const index in headers) {
-                if (columns[index] === 'tags') {
-                    _cols.push({
-                        title: headers[index],
-                        field: columns[index],
-                        editable: "never",
-                        render: rowData => <WordTags
-                            tagsList={tags}
-                            selected={rowData.tags ? rowData.tags : []}
-                            onSubmit={(rowTags) => {
-                                rowData.tags = rowTags;
-                                updateData(rowData._id, rowTags, null);
-                            }} />
-                    });
-                } else {
-                    if (columns[index] === 'translation') {
-                        _cols.push({ title: headers[index], field: columns[index] });
-                    } else {
-                        _cols.push({ title: headers[index], field: columns[index], editable: "never" });
-                    }
-                }
-            }
+                let formattedClmn = { title: headers[index], field: columns[index] };
 
-            //add only needed data fields 
-            const _data = data.map(
-                (row) => ({ ...row, translation: row.translation[0] })
-            );
+                if (columns[index] !== 'translation') {
+                    formattedClmn.editable = "never";
+                }
+
+                if (columns[index] === 'tags') {
+                    formattedClmn.render = (rowData) => <WordTags
+                        options={tags}
+                        selected={rowData.tags}
+                        onSubmit={(rowTags) => {
+                            rowData.tags = rowTags;
+                            updateData(rowData._id, rowTags, null);
+                        }}
+                    />
+                }
+                _cols.push(formattedClmn);
+            }
 
             setState({ columns: _cols, data: _data });
 
@@ -61,39 +56,30 @@ export default function WordTable({ headers, columns, data, tags }) {
         updateData(id, null, cellData);
     }, [updateData]);
 
-    const renderTable = React.useMemo(
-        () => {
-            return (
-                <MaterialTable
-                    title="Estonian Words"
-                    columns={state.columns}
-                    data={state.data}
-                    cellEditable={{
-                        onCellEditApproved: (newData, oldData, rowData, columnDef) =>
-                            new Promise((resolve, reject) => {
-
-                                setTimeout(() => {
-                                    resolve();
-                                    if (oldData !== newData) {
-                                        handleUpdateRequest(rowData._id, newData);
-                                        setState((prevState) => {
-                                            const data = [...prevState.data];
-                                            data[data.indexOf(rowData)][columnDef.field] = newData;
-                                            return { ...prevState, data };
-                                        });
-                                    }
-                                }, 600);
-                            })
-                    }}
-                    options={{
-                        headerStyle: {
-                            fontWeight: "bold"
+    return (<MaterialTable
+        title="Estonian Words"
+        columns={state.columns}
+        data={state.data}
+        cellEditable={{
+            onCellEditApproved: (newData, oldData, rowData, columnDef) =>
+                new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        resolve();
+                        if (oldData !== newData) {
+                            handleUpdateRequest(rowData._id, newData);
+                            setState((prevState) => {
+                                const data = [...prevState.data];
+                                data[data.indexOf(rowData)][columnDef.field] = newData;
+                                return { ...prevState, data };
+                            });
                         }
-                    }}
-                ></MaterialTable>);
-        }, [state, handleUpdateRequest]
-    );
-
-    return (<Typography component="div">{renderTable}</Typography>);
-
+                    }, 600);
+                })
+        }}
+        options={{
+            headerStyle: {
+                fontWeight: "bold"
+            }
+        }}
+    />);
 }

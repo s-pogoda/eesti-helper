@@ -2,7 +2,7 @@ import React from 'react';
 import { TextField } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 
-export default function WordTags({ tagsList, selected, onSubmit }) {
+export default function WordTags({ options, selected, onSubmit }) {
 
     const handleOnChange = React.useCallback(
         (event, value) => {
@@ -14,7 +14,7 @@ export default function WordTags({ tagsList, selected, onSubmit }) {
         <Autocomplete
             multiple
             freeSolo
-            options={tagsList}
+            options={options}
             defaultValue={selected}
             onChange={handleOnChange}
             ChipProps={{ color: "primary", variant: "outlined"}}
