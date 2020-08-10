@@ -23,4 +23,9 @@ getDb = (async () => {
     return client.db(dbName);
 });
 
-module.exports = getDb;
+async function getCollection (name) {
+    const db = await getDb();
+    return db.collection(name);
+}
+
+module.exports = getCollection;

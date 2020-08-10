@@ -28,12 +28,12 @@ const getOptions = (funcName, param) => {
     };
 };
 
-const getDefinitionBlock = ($, word) => {
+const getDefinitions = ($, word) => {
     let definitions = $('.m').filter((i, e) => $(e).text().replace(/\+/g, '').trim() === word).get();
     if (!definitions.length) {
         definitions = $('.d').filter((i, e) => $(e).text().replace(/\+/g, '').trim() === word).get();
     }
-    return $(definitions[0]).parent();
+    return definitions;
 };
 
 const validate = (word) => {
@@ -47,10 +47,14 @@ async function findTranslation(word) {
     try {
         const $ = await request(_options);
         // find definitions without prefixes and suffixes
-        const _definition = getDefinitionBlock($, word);
+        const _definitions = getDefinitions($, word);
 
-        if (_definition) {
-            const _list = $(_definition).find('.x').map((i, e) => $(e).text().trim()).get();
+        if (_definitions.length) {
+            let _list = [];
+            _definitions.forEach(element => {
+                const blockTranslations = $(element).parent().find('.x').map((i, e) => $(e).text().trim()).get();
+                _list = _list.concat(blockTranslations);
+            });
             // return only unique values
             return [...new Set(_list)];
 

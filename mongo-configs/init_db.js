@@ -1,5 +1,5 @@
 
-db = db.getSiblingDB('words')
+db = db.getSiblingDB('words');
 
 db.createUser({
 	user: "eesti_user",
@@ -11,7 +11,7 @@ db.createUser({
 	}]
 
 
-})
+});
 
 db.createCollection("words", {
 	validator: {
@@ -42,18 +42,46 @@ db.createCollection("words", {
 					}
 				},
 				type: {
-					enum: ["tegusõna", "nimisõna", "omadussõna", "asesõna"],
-					description: "can only be one of the enum"
+					bsonType: "string",
+					description: "must be a string and is required"
 				},
 				failed: {
 					bsonType: "bool",
 					description: "must be a boolean"
+				},
+				tags: {
+					bsonType: ["array"],
+					minItem: 0,
+					uniqueItems: true,
+					item: {
+						bsonType: "string",
+						description: "must be a string"
+					}
 				}
 			}
 		}
 	},
 	validationLevel: "strict",
 	validationAction: "error"
-})
+});
 
-db.words.createIndex({firstCase: 1}, {unique: true})
+db.words.createIndex({firstCase: 1}, {unique: true});
+
+db.createCollection("tags", {
+	validator: {
+		$jsonSchema: {
+			bsonType: "object",
+			required: ["tag"],
+			properties: {
+				tag: {
+					bsonType: "string",
+					description: "must be a string"
+				}
+			}
+		}
+	},
+	validationLevel: "strict",
+	validationAction: "error"
+});
+
+db.tags.createIndex({tag: 1}, {unique: true});
