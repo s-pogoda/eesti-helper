@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Grid, Button, List, Typography } from '@material-ui/core';
+import { Container, Grid, Button, List, Typography } from '@material-ui/core';
 import PreQuiz from './PreQuiz';
 import QuizField from './QuizField';
 import ResultList from './ResultList';
@@ -9,9 +9,10 @@ import request from '../requests/backend-request';
 
 export default function QuizPage() {
 
+    const [event, setEvent] = React.useState("CONFIG");
+    const [options, setOptions] = React.useState({ limit: 0, selector: "", type: "", tags: "" });
+
     const [state, setState] = React.useState({
-        event: "CONFIG",
-        reqOpts: { limit: 0, selector: "", type: "" },
         words: [],
         answers: {},
         failed: []
@@ -20,25 +21,26 @@ export default function QuizPage() {
     React.useEffect(() => {
         async function getData() {
             try {
-                if (state.reqOpts.selector) {
-                    const response = await request.find([state.reqOpts.selector, state.reqOpts.limit, state.reqOpts.type]);
-                    setState((prev) => ({ ...prev, event: "QUIZ", words: response.data }));
+                if (options.selector) {
+                    const response = await request.find([options.selector, options.limit, options.type, options.tags]);
+                    setEvent("QUIZ");
+                    setState((prev) => ({ ...prev, words: response.data }));
                 }
             } catch (e) {
                 console.error(e.message);
             }
         }
-        if (state.event === "CONFIG") {
+        if (event === "CONFIG") {
             getData();
         }
 
-    }, [state.event, state.reqOpts, setState]
+    }, [event, options, setEvent, setState]
     );
 
     const handleStart = React.useCallback(
         (event) => {
-            setState((prev) => ({ ...prev, reqOpts: event }));
-        }, [setState]
+            setOptions(event);
+        }, [setOptions]
     );
 
     const handleWordSubmit = React.useCallback(
@@ -53,24 +55,25 @@ export default function QuizPage() {
             async function requestResult() {
                 try {
                     const response = await request.quizResult(state.words, state.answers);
-                    setState((prev) => ({ ...prev, event: "RESULT", failed: response.data }));
+                    setEvent("RESULT");
+                    setState((prev) => ({ ...prev, failed: response.data }));
                 } catch (e) {
                     console.error(e.message);
                 }
             }
             requestResult();
 
-        }, [state, setState]
+        }, [state, setEvent, setState]
     );
 
     const generateComponent = React.useMemo(() => {
-        switch (state.event) {
+        switch (event) {
             // Fill quiz words
             case "QUIZ": {
                 if (!state.words.length) {
-                    return (<Typography variant="h3" color="primary">Request have 0 matches</Typography>);
+                    return (<Typography variant="body1" color="primary">Request have 0 matches</Typography>);
                 }
-                return (<Typography component="div">
+                return (<Container maxWidth="lg">
                     <List>
                         {state.words.map(
                             (item, index) => {
@@ -80,7 +83,7 @@ export default function QuizPage() {
                         )}
                     </List>
                     <Button variant="contained" color="primary" onClick={handleQuizResult}>Check</Button>
-                </Typography>);
+                </Container>);
             }
 
             // Show quiz result
@@ -106,10 +109,10 @@ export default function QuizPage() {
                 return (<PreQuiz onSubmit={handleStart}></PreQuiz>);
             }
         }
-    }, [state, handleStart, handleWordSubmit, handleQuizResult]);
+    }, [event, state, handleStart, handleWordSubmit, handleQuizResult]);
 
     return (
-        <Typography component="div">
+        <>
             {generateComponent}
-        </Typography>);
+        </>);
 }

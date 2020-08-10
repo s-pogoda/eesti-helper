@@ -1,29 +1,30 @@
 import React from 'react';
-import { Typography } from '@material-ui/core';
+import { Container } from '@material-ui/core';
 import WordTable from './WordTable';
 
 import request from '../requests/backend-request';
 
 export default function ListPage() {
 
-    const [state, setState] = React.useState({ data: [] });
+    const [state, setState] = React.useState({ data: [], tags: [] });
 
-    const headers = ["Translation", "MA-infinitive / 1st Case", "DA-infinitive / 2nd Case", "ME-form / 3rd Case"];
-    const columns = ["translation", "firstCase", "secondCase", "thirdCase"];
+    const headers = ["Translation", "MA-infinitive / 1st Case", "DA-infinitive / 2nd Case", "ME-form / 3rd Case", "Tags"];
+    const columns = ["translation", "firstCase", "secondCase", "thirdCase", "tags"];
 
     React.useEffect(() => {
         async function getData() {
-            const response = await request.find(["all"]);
-            setState((prev) => ({ ...prev, data: response.data }));
+            const dataResponse = await request.find(["all"]);
+            const tagsResponse = await request.findTags();
+            setState({ data: dataResponse.data, tags: tagsResponse.data });
         }
         getData();
 
-        return () => setState({ data: [] });
+        return () => setState({ data: [], tags: [] });
     }, [setState]);
 
     return (
-        <Typography component="div">
-            <WordTable headers={headers} columns={columns} data={state.data} />
-        </Typography>
+        <Container maxWidth="lg">
+            <WordTable headers={headers} columns={columns} data={state.data} tags={state.tags} />
+        </Container>
     );
 }

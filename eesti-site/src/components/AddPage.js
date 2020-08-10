@@ -1,6 +1,8 @@
 import React from 'react';
-import { Grid, List, Collapse, IconButton, Button, ListItem, ListItemText, TextField, ListItemIcon, Typography, Tooltip } from '@material-ui/core';
+import { Grid, Collapse, Typography, Tooltip, Button, TextField } from '@material-ui/core';
+import { List, ListItem, ListItemText, ListItemIcon, IconButton } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
+import AddRoundedIcon from '@material-ui/icons/AddRounded';
 import CloseIcon from '@material-ui/icons/Close';
 import DeleteIcon from '@material-ui/icons/Delete';
 
@@ -59,17 +61,18 @@ function NewPage() {
     const renderList = React.useMemo(() => {
         return state.data.map((row, index) => {
             return (
-                <ListItem key={index} tabIndex={-1} button onClick={() => handleRemoveItem(index)}>
-                    <ListItemIcon><DeleteIcon color="primary" /></ListItemIcon>
-                    <ListItemText align="left" primary={<Typography variant="body1" color="primary">{row}</Typography>} />
+                <ListItem key={index} tabIndex={-1} button >
+                    <ListItemIcon><AddRoundedIcon color="primary" /></ListItemIcon>
+                    <ListItemText align="left" primary={<Typography variant="body1">{row}</Typography>} />
+                    <IconButton tabIndex={-1} onClick={() => handleRemoveItem(index)}><DeleteIcon color="primary" /></IconButton>
                 </ListItem>
             )
         });
     }, [state, handleRemoveItem]);
 
     return (
-        <div>
-            <Grid container align="center">
+        <>
+            <Grid container align="center" justify="center">
                 <Grid item xs={12} >
                     <Tooltip title="press Enter to add new word" placement="right">
                         <TextField
@@ -78,11 +81,9 @@ function NewPage() {
                             onKeyDown={handleNewWord} />
                     </Tooltip>
                 </Grid>
-                <Grid item xs={5} />
                 <Grid item xs={3}>
-                    <List>{renderList}</List>
+                    <List >{renderList}</List>
                 </Grid>
-                <Grid item xs={4} />
                 <Grid item xs={12}>
                     <Button variant="contained" color="primary" onClick={handleSaveClick}>Save</Button>
                 </Grid>
@@ -102,7 +103,7 @@ function NewPage() {
                     }
                 >{state.alert.txt}</Alert>
             </Collapse>
-        </div>
+        </>
     );
 }
 

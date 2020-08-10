@@ -1,5 +1,5 @@
 import React from 'react';
-import CreateIcon from '@material-ui/icons/Create';
+import CreateRoundedIcon from '@material-ui/icons/CreateRounded';
 import { Typography, List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 
 export default function ResultList({ words, answers }) {
@@ -14,7 +14,7 @@ export default function ResultList({ words, answers }) {
                         return (
                             <ListItem key={word._id}>
                                 <ListItemIcon>
-                                    <CreateIcon color="primary" />
+                                    <CreateRoundedIcon color="primary" />
                                 </ListItemIcon>
                                 <ListItemText
                                     primary={<Typography variant="body1" color="error">
