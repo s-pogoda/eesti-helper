@@ -22,9 +22,7 @@ const parseWordTitles = (type) => {
 const getOptions = (funcName, param) => {
     return {
         uri: getURI(funcName, param),
-        transform: function (body) {
-            return cheerio.load(body);
-        }
+        transform: (body) => cheerio.load(body)
     };
 };
 
