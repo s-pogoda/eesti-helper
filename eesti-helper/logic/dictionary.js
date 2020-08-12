@@ -19,106 +19,93 @@ const parseWordTitles = (type) => {
     };
 };
 
-const getOptions = (funcName, param) => {
-    return {
-        uri: getURI(funcName, param),
-        transform: (body) => cheerio.load(body)
-    };
-};
+const getOptions = (funcName, param) => ({
+    uri: getURI(funcName, param),
+    transform: (body) => cheerio.load(body)
+});
 
 const getDefinitions = ($, word) => {
-    let definitions = $('.m').filter((i, e) => $(e).text().replace(/\+/g, '').trim() === word).get();
-    if (!definitions.length) {
-        definitions = $('.d').filter((i, e) => $(e).text().replace(/\+/g, '').trim() === word).get();
+    const firstLvlDefinitions = $('.m').filter((i, e) => $(e).text().replace(/\+/g, '').trim() === word).get();
+    if (!firstLvlDefinitions.length) {
+        // search and return definitions from second level
+        return $('.d').filter((i, e) => $(e).text().replace(/\+/g, '').trim() === word).get();
     }
-    return definitions;
+    return firstLvlDefinitions;
 };
 
 const validate = (word) => {
-    if (word.firstCase === "" || word.secondCase === "" || word.thirdCase === "" || !word.translation.length)
-        throw new Error("Validation failed. " + JSON.stringify(word));
-}
+    if (word.firstCase === "" || word.secondCase === "" || word.thirdCase === "" || !word.translation.length) {
+        throw new Error("404 - validation failed: " + JSON.stringify(word));
+    }
+};
 
 async function findTranslation(word) {
-    const _options = getOptions(findTranslation.name, word);
+    const options = getOptions(findTranslation.name, word);
+    const $ = await request(options);
 
-    try {
-        const $ = await request(_options);
-        // find definitions without prefixes and suffixes
-        const _definitions = getDefinitions($, word);
+    // find definitions without prefixes and suffixes
+    const definitions = getDefinitions($, word);
 
-        if (_definitions.length) {
-            let _list = [];
-            _definitions.forEach(element => {
-                const blockTranslations = $(element).parent().find('.x').map((i, e) => $(e).text().trim()).get();
-                _list = _list.concat(blockTranslations);
-            });
-            // return only unique values
-            return [...new Set(_list)];
+    if (definitions.length) {
+        const list = [];
+        definitions.forEach(element => {
+            const blockTranslations = $(element).parent().find('.x').map((i, e) => $(e).text().trim()).get();
+            list.push(...blockTranslations);
+        });
 
-        } else
-            throw new Error("word translation not found");
-    } catch (e) {
-        throw new Error("Can't get word translation correctly: " + e.message);
+        // return only unique values
+        return [...new Set(list)];
+
+    } else {
+        throw new Error("404 - word translation not found.");
     }
 }
 
-async function findWord(id, words, isComplex) {
-    const _options = getOptions(findWord.name, id);
+async function findWord(id, words, isComplexWord) {
+    const options = getOptions(findWord.name, id);
+    const $ = await request(options);
+    const word = { failed: false };
 
-    try {
-        const $ = await request(_options);
+    word.type = $('.my-1').map((i, e) => { return $(e).text(); }).get().join();
+    const cases = parseWordTitles(word.type);
+    for (const field in cases) {
+        const searchedCase = $('.morph-word').filter((i, e) => $(e).attr('title').trim().startsWith(cases[field]));
 
-        let _word = { failed: false };
-        _word.type = $('.my-1').map((i, e) => { return $(e).text(); }).get().join();
-
-        const _cases = parseWordTitles(_word.type);
-        for (const field in _cases) {
-            const _case = $('.morph-word').filter((i, e) => $(e).attr('title').trim().startsWith(_cases[field]));
-
-            if (field === "thirdCase") {
-                _word[field] = isComplex ? [$(_case[0]).text(), words[0]].join(' ') : $(_case[0]).text();
-            } else {
-                _word[field] = isComplex ? [words[0], $(_case[0]).text()].join(' ') : $(_case[0]).text();
-            }
+        // different processing for complex and simple words.
+        if (field === "thirdCase") {
+            word[field] = isComplexWord ? [$(searchedCase[0]).text(), words[0]].join(' ') : $(searchedCase[0]).text();
+        } else {
+            word[field] = isComplexWord ? [words[0], $(searchedCase[0]).text()].join(' ') : $(searchedCase[0]).text();
         }
-        _word.translation = await findTranslation(_word.firstCase);
-
-        validate(_word);
-        return _word;
-    } catch (e) {
-        throw new Error("Can't generate word: " + e.message);
     }
+    word.translation = await findTranslation(word.firstCase);
+    validate(word);
+    return word;
 }
 
 async function searchInDictionary(term) {
-
-    let _options;
+    let options;
 
     // http://sonaveeb.ee not always include three cases for complex terms (that contain 2 words)
-    // in case with complex word we need to find three main cases 
-    // only for changeble word, which is on _words[1] position 
-    let _complexity = false;
-    const _words = term.split(' ');
+    // in case with complex word we need to find three main cases
+    // only for changeble word, which is on words[1] position
+    let isComplexWord = false;
+    const words = term.split(' ');
 
-    if (_words.length > 1) {
-        _options = getOptions(searchInDictionary.name, _words[1]);
-        _complexity = !_complexity;
+    if (words.length > 1) {
+        options = getOptions(searchInDictionary.name, words[1]);
+        isComplexWord = true;
     } else {
-        _options = getOptions(searchInDictionary.name, term);
+        options = getOptions(searchInDictionary.name, term);
     }
-    try {
 
-        const $ = await request(_options);
-        const _id = $('input[name=word-id]').attr('value');
+    const $ = await request(options);
+    const id = $('input[name=word-id]').attr('value');
 
-        if (_id) {
-            return await findWord(_id, _words, _complexity);
-        } else {
-            throw new Error("404 - Not Found.");
-        }
-    } catch (e) {
-        throw e;
+    if (id) {
+        return await findWord(id, words, isComplexWord);
+    } else {
+        throw new Error("404 - page not found.");
     }
 }
 

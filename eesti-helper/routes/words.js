@@ -3,145 +3,167 @@ const router = express.Router();
 const ObjectID = require('mongodb').ObjectID;
 
 const getCollection = require('../database/database');
-const dictionary = require('../logic/dictionary');
+const searchInDictionary = require('../logic/dictionary');
 
 const prepareInput = (str) => {
     return str.replace(/\s+/g, " ").trim();
 };
 
 router.post('/insert', async (req, res) => {
-    const _list = req.body;
-
-    const _words = [], _fails = [];
+    const list = req.body.map((item) => prepareInput(item));
+    const fails = [];
     try {
-        await Promise.all(_list.map(async (name) => {
-            try {
-                const word = await dictionary(prepareInput(name));
-                _words.push(word);
-            } catch (e) {
-                console.error(e.message);
-                _fails.push(name);
+        const wordsCollection = await getCollection('words');
+        const dublicates = await wordsCollection.find({ firstCase: { $in: list } })
+            .map((item) => item.firstCase).toArray();
+        const words = [];
+        await Promise.all(list.filter((item) => !dublicates.includes(item))
+            .map(async (name) => {
+                try {
+                    const word = await searchInDictionary(name);
+                    words.push(word);
+                } catch (e) {
+                    console.error(e.message);
+                    fails.push(name);
+                }
+            })
+        );
+
+        if (words.length) {
+            await wordsCollection.insertMany(words, { ordered: false });
+        } else {
+            if (fails.length) {
+                throw new Error(`404 - Not found ${fails.join()}`);
             }
-        }));
-
-        if (_words.length) {
-            const _collection = await getCollection('words');
-            await _collection.insertMany(_words, { ordered: false });
-            res.status(200).send(_fails);
-        } else
-            throw new Error(`404 - Not found ${_fails.join()}`);
-
+        }
+        res.status(200).send(fails);
     } catch (e) {
-        console.error("ERROR: " + e.message);
-        //TODO: re-think errors handling
-        let status = e.message.includes('E11000 duplicate key error collection') ? 200 : 500;
-        status = e.message.includes('404') ? 404 : status;
+        console.error(e.message);
 
-        res.status(status).send(_fails);
+        // Duplicate key error could accure when user searching term not in first case condition.
+        // So term will not be detected by the dublicates filter, and will be made an attempt to save it.
+        if (e.message.includes('duplicate key error')) {
+            res.status(200).send(fails);
+        } else {
+            let status = e.message.includes('404') ? 404 : 500;
+            res.status(status).end();
+        }
     }
 });
 
 router.get('/tags', async (req, res) => {
     try {
-        const _collection = await getCollection('tags');
-        const _result = await _collection.find().sort({tag: 1}).toArray();
-        res.status(200).send(_result.map(item => item.tag));
+        const tagsCollection = await getCollection('words');
+        const result = await tagsCollection.find().sort({ tag: 1 }).map(item => item.tag).toArray();
+        res.status(200).send(result);
     } catch (e) {
         console.error(e.message);
-        res.status(500).send();
+        res.status(500).end();
     }
 });
 
 router.get('/find', async (req, res) => {
-    const _query = JSON.parse(req.query.q) || {};
-    const _filter = JSON.parse(req.query.f) || {};
-
     try {
-        const _collection = await getCollection('words');
-
-        const _result = await _collection.find(_query, _filter).toArray();
-        res.status(200).send(_result);
+        const wordsCollection = await getCollection('words');
+        const result = await wordsCollection.find().sort({ _id: -1 }).toArray();
+        res.status(200).send(result);
     } catch (e) {
         console.error(e.message);
-        res.status(500).send();
+        res.status(500).end();
+    }
+});
+
+router.get('/quiz-list', async (req, res) => {
+    const query = JSON.parse(req.query.q) || {};
+    const filter = JSON.parse(req.query.f) || {};
+
+    try {
+        const wordsCollection = await getCollection('words');
+        const result = await wordsCollection.find(query, filter)
+            .sort({ _id: -1 })
+            .map((word) => ({ _id: word._id, type: word.type, translation: word.translation }))
+            .toArray();
+        res.status(200).send(result);
+    } catch (e) {
+        console.error(e.message);
+        res.status(500).end();
     }
 });
 
 router.post('/update/:id', async (req, res) => {
     const translation = req.body.translation;
     const tags = req.body.tags;
-    let query = {};
+    const query = {};
 
     try {
         if (tags) {
             query.tags = tags;
-            if (tags.length) {
-                const _tagsCollection = await getCollection('tags');
-                await _tagsCollection.insertMany(tags.map(item => ({ tag: item })), { ordered: false });
+            const tagsCollection = await getCollection('tags');
+            const dublicates = await tagsCollection.find({ tag: { $in: tags } })
+                .map((item) => item.tag)
+                .toArray();
+            const filteredTags = await tags.filter((item) => !dublicates.includes(item))
+                .map((item) => ({ tag: item }));
+
+            if (filteredTags.length) {
+                await tagsCollection.insertMany(filteredTags, { ordered: false });
             }
         }
 
-    } catch (e) {
-        console.error("1. " + e.message);
-        if (!e.message.includes('E11000 duplicate key error collection'))
-            res.status(500).send();
-    }
-
-    try {
-        const _collection = await getCollection('words');
+        const wordsCollection = await getCollection('words');
         if (translation) {
-            //TODO: change logic - replace findOne & unshift part
-            const _word = await _collection.findOne({ _id: ObjectID(req.params.id) });
-            _word.translation.unshift(translation);
-            query.translation = [...new Set(_word.translation)];
+            // add new translation at the top of array
+            const word = await wordsCollection.findOne({ _id: ObjectID(req.params.id) });
+            word.translation.unshift(translation);
+            query.translation = [...new Set(word.translation)];
         }
 
-        await _collection.updateOne({ _id: ObjectID(req.params.id) }, { $set: query });
-        res.status(200).send();
+        await wordsCollection.updateOne({ _id: ObjectID(req.params.id) }, { $set: query });
+        res.status(200).end();
 
     } catch (e) {
         console.error(e.message);
-        res.status(500).send();
+        res.status(500).end();
     }
 });
 
 router.post('/quiz-result', async (req, res) => {
-    // array of origin words
-    const _words = req.body.words;
+    // array of words IDs
+    const wordIds = req.body.words.map((w) => ObjectID(w._id));
     // object of answers
-    const _answers = req.body.answers;
-    const _failed = [], _failedIds = [], _fixedIds = [];
+    const answers = req.body.answers;
+    const failed = [], failedIds = [], fixedIds = [];
 
-    //compare user answers with correct values
-    _words.forEach((word) => {
-        const answer = _answers[word._id];
-        if (!answer || word.firstCase !== prepareInput(answer.firstCase)
-            || word.secondCase !== prepareInput(answer.secondCase)
-            || word.thirdCase !== prepareInput(answer.thirdCase)) {
-            word.failed = true;
-            _failedIds.push(ObjectID(word._id));
-            _failed.push(word);
-        } else {
-            // if you failed word before, but now not --> change failed status
-            if (word.failed) _fixedIds.push(ObjectID(word._id));
-        }
-    });
-
-    //update db
     try {
-        const _collection = await getCollection('words');
-        if (_fixedIds.length) {
-            await _collection.updateMany({ _id: { $in: _fixedIds } }, { $set: { "failed": false } });
+        const wordsCollection = await getCollection('words');
+        const words = await wordsCollection.find({ _id: { $in: wordIds } }).toArray();
+        //compare user answers with correct values
+        for (const word of words) {
+            const answer = answers[word._id];
+            if (!answer || word.firstCase !== prepareInput(answer.firstCase)
+                || word.secondCase !== prepareInput(answer.secondCase)
+                || word.thirdCase !== prepareInput(answer.thirdCase)) {
+                word.failed = true;
+                failedIds.push(ObjectID(word._id));
+                failed.push(word);
+            } else {
+                // if you failed word before, but now not --> change failed status
+                if (word.failed) fixedIds.push(ObjectID(word._id));
+            }
         }
-        if (_failedIds.length) {
-            await _collection.updateMany({ _id: { $in: _failedIds } }, { $set: { "failed": true } });
+
+        //update db
+        if (fixedIds.length) {
+            await wordsCollection.updateMany({ _id: { $in: fixedIds } }, { $set: { "failed": false } });
         }
+        if (failedIds.length) {
+            await wordsCollection.updateMany({ _id: { $in: failedIds } }, { $set: { "failed": true } });
+        }
+        res.status(200).send(failed);
     } catch (e) {
         console.error(e.message);
-        res.status(500).send();
+        res.status(500).end();
     }
-
-    res.status(200).send(_failed);
 });
 
 module.exports = router;

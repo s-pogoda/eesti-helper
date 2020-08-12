@@ -1,11 +1,10 @@
 const MongoClient = require('mongodb').MongoClient;
-
 const configs = require('../config/configs').mongoUrl;
 
 let client, attempts = 0;
 const dbName = 'words';
 
-getDb = (async () => {
+async function getDb() {
     if (!client) {
         if (attempts > 5) {
             throw new Error("Can't connect to " + configs());
@@ -19,13 +18,10 @@ getDb = (async () => {
             return getDb();
         }
     }
-
     return client.db(dbName);
-});
-
-async function getCollection (name) {
-    const db = await getDb();
-    return db.collection(name);
 }
 
-module.exports = getCollection;
+module.exports = async (collectionName) => {
+    const db = await getDb();
+    return db.collection(collectionName);
+};
