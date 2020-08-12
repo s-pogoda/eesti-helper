@@ -13,8 +13,7 @@ export default function ListPage() {
 
     React.useEffect(() => {
         async function getData() {
-            const dataResponse = await request.find(["all"]);
-            const tagsResponse = await request.findTags();
+            const [dataResponse, tagsResponse] = await Promise.all([request.find(["all"]), request.findTags()]);
             setState({ data: dataResponse.data, tags: tagsResponse.data });
         }
         getData();
