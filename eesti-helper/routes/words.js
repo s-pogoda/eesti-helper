@@ -53,7 +53,7 @@ router.post('/insert', async (req, res) => {
 
 router.get('/tags', async (req, res) => {
     try {
-        const tagsCollection = await getCollection('words');
+        const tagsCollection = await getCollection('tags');
         const result = await tagsCollection.find().sort({ tag: 1 }).map(item => item.tag).toArray();
         res.status(200).send(result);
     } catch (e) {
