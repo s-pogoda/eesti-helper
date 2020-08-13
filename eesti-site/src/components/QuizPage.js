@@ -22,7 +22,7 @@ export default function QuizPage() {
         async function getData() {
             try {
                 if (options.selector) {
-                    const response = await request.find([options.selector, options.limit, options.type, options.tags]);
+                    const response = await request.quizList(options);
                     setEvent("QUIZ");
                     setState((prev) => ({ ...prev, words: response.data }));
                 }
@@ -88,6 +88,7 @@ export default function QuizPage() {
 
             // Show quiz result
             case "RESULT": {
+                console.log(state);
                 const passed = state.words.length - state.failed.length;
 
                 return (<Grid container align="center" >

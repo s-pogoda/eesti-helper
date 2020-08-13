@@ -18,35 +18,32 @@ export default function WordTable({ headers, columns, data, tags }) {
 
     React.useEffect(
         () => {
-
-            const _data = data.map(
-                (row) => ({ ...row, key: row._id, translation: row.translation[0] })
-            );
+            const mountData = data.map((row) => ({ ...row, translation: row.translation[0] }));
 
             // create expected columns format
-            const _cols = [];
+            const mountColumns = [];
             for (const index in headers) {
-                let formattedClmn = { title: headers[index], field: columns[index] };
+                let formattedColumn = { title: headers[index], field: columns[index] };
 
                 if (columns[index] !== 'translation') {
-                    formattedClmn.editable = "never";
+                    formattedColumn.editable = "never";
                 }
 
                 if (columns[index] === 'tags') {
-                    formattedClmn.render = (rowData) => <WordTags
+                    formattedColumn.render = (rowData) => (<WordTags
                         options={tags}
                         selected={rowData.tags}
                         onSubmit={(rowTags) => {
                             rowData.tags = rowTags;
                             updateData(rowData._id, rowTags, null);
                         }}
-                    />
+                    />);
                 }
-                _cols.push(formattedClmn);
+                mountColumns.push(formattedColumn);
             }
+            setState({ columns: mountColumns, data: mountData });
 
-            setState({ columns: _cols, data: _data });
-
+            //unmount
             return () => setState({ columns: [], data: [] });
 
         }, [headers, columns, data, tags, setState, updateData]

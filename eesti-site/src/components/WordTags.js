@@ -5,10 +5,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 export default function WordTags({ options, selected, onSubmit }) {
 
     const handleOnChange = React.useCallback(
-        (event, value) => {
-            onSubmit(value);
-        }, [ onSubmit]);
-
+        (event, value) => onSubmit(value), [onSubmit]);
 
     return (
         <Autocomplete
@@ -17,12 +14,9 @@ export default function WordTags({ options, selected, onSubmit }) {
             options={options}
             defaultValue={selected}
             onChange={handleOnChange}
-            ChipProps={{ color: "primary", variant: "outlined"}}
+            ChipProps={{ color: "primary", variant: "outlined" }}
 
-            renderInput={(params) => <TextField
-                {...params}
-                variant="standard"
-            />}
+            renderInput={(params) => <TextField {...params} variant="standard" />}
         />
     );
 }

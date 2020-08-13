@@ -6,9 +6,11 @@ export default function QuizField({ id, word, isVerb, onSubmit }) {
 
     const [state, setState] = React.useState({ id: '', data: { firstCase: '', secondCase: '', thirdCase: '' } });
 
-    const error_first = state.data.firstCase === '';
-    const error_second = state.data.secondCase === '';
-    const error_third = state.data.thirdCase === '';
+    const { errorFirst, errorSecond, errorThird } = React.useMemo(() => ({
+        errorFirst: state.data.firstCase === '',
+        errorSecond: state.data.secondCase === '',
+        errorThird: state.data.thirdCase === ''
+    }), [state.data]);
 
     React.useEffect(
         () => {
@@ -31,10 +33,10 @@ export default function QuizField({ id, word, isVerb, onSubmit }) {
 
     const handleOnBlur = React.useCallback(
         (event) => {
-            if (!error_first && !error_second && !error_third) {
+            if (!errorFirst && !errorSecond && !errorThird) {
                 onSubmit(state);
             }
-        }, [error_first, error_second, error_third, state, onSubmit]
+        }, [errorFirst, errorSecond, errorThird, state, onSubmit]
     );
 
     return (
@@ -51,7 +53,7 @@ export default function QuizField({ id, word, isVerb, onSubmit }) {
                     label={isVerb ? "MA-Infinitive" : "1st Case"}
                     onChange={handleOnChange}
                     onBlur={handleOnBlur}
-                    error={error_first}
+                    error={errorFirst}
                 />
             </Grid>
             <Grid item xs={3}>
@@ -63,7 +65,7 @@ export default function QuizField({ id, word, isVerb, onSubmit }) {
                     label={isVerb ? "DA-Infinitive" : "2nd Case"}
                     onChange={handleOnChange}
                     onBlur={handleOnBlur}
-                    error={error_second}
+                    error={errorSecond}
                 />
             </Grid>
             <Grid item xs={3}>
@@ -75,7 +77,7 @@ export default function QuizField({ id, word, isVerb, onSubmit }) {
                     label={isVerb ? "'ME'-form" : "3rd Case"}
                     onChange={handleOnChange}
                     onBlur={handleOnBlur}
-                    error={error_third}
+                    error={errorThird}
                 />
             </Grid>
         </Grid>

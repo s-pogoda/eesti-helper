@@ -10,8 +10,8 @@ import request from '../requests/backend-request';
 
 function NewPage() {
 
-    const [state, setState] = React.useState({ alert: { open: false, txt: "", severity: "success" }, data: [] });
-
+    const [alert, setAlert] = React.useState({ open: false, txt: "", severity: "success" });
+    const [data, setData] = React.useState([]);
     const textInput = React.useRef(null);
 
     const handleNewWord = React.useCallback(
@@ -19,56 +19,56 @@ function NewPage() {
             if (event.keyCode === 13) {
                 const value = event.target.value;
                 if (value) {
-                    setState((prev) => ({ ...prev, data: [...prev.data, value] }));
+                    setData((prev) => [...prev, value]);
                     setTimeout(() => {
                         textInput.current.value = null;
                     }, 100);
                 }
             }
         },
-        [setState]);
+        [textInput, setData]);
 
     const handleRemoveItem = React.useCallback(
         (index) => {
-            setState((prev) => ({ ...prev, data: prev.data.filter((e, i) => i !== index) }));
-        }, [setState]);
+            setData((prev) => prev.data.filter((e, i) => i !== index));
+        }, [setData]);
 
     const handleSaveClick = React.useCallback((event) => {
         async function saveData() {
-            if (state.data.length) {
-                let severity, txt;
+            if (data.length) {
+                const newAlert = { open: true };
                 try {
-                    const response = await request.insertMany(state.data);
+                    const response = await request.insertMany(data);
 
                     if (response.data.length) {
-                        severity = "warning";
-                        txt = "Saved all, except: " + response.data.join();
+                        newAlert.severity = "warning";
+                        newAlert.txt = "Saved all, except: " + response.data.join();
                     } else {
-                        severity = "success";
-                        txt = "Successfully saved";
+                        newAlert.severity = "success";
+                        newAlert.txt = "Successfully saved";
                     }
                 } catch (e) {
-                    severity = "error";
-                    txt = "Failed to save: " + e.message;
+                    newAlert.severity = "error";
+                    newAlert.txt = "Failed to save: " + e.message;
                 }
-                setState({ alert: { open: true, severity: severity, txt: txt }, data: [] });
+                setAlert(newAlert);
+                setData([]);
             }
         }
         saveData();
 
-    }, [state, setState]);
+    }, [data, setData, setAlert]);
 
-    const renderList = React.useMemo(() => {
-        return state.data.map((row, index) => {
-            return (
+    const renderList = React.useMemo(() =>
+        data.map((row, index) =>
+            (
                 <ListItem key={index} tabIndex={-1} button >
                     <ListItemIcon><AddRoundedIcon color="primary" /></ListItemIcon>
                     <ListItemText align="left" primary={<Typography variant="body1">{row}</Typography>} />
                     <IconButton tabIndex={-1} onClick={() => handleRemoveItem(index)}><DeleteIcon color="primary" /></IconButton>
                 </ListItem>
-            )
-        });
-    }, [state, handleRemoveItem]);
+
+            )), [data, handleRemoveItem])
 
     return (
         <>
@@ -88,20 +88,20 @@ function NewPage() {
                     <Button variant="contained" color="primary" onClick={handleSaveClick}>Save</Button>
                 </Grid>
             </Grid>
-            <Collapse in={state.alert.open}>
+            <Collapse in={alert.open}>
                 <Alert
-                    severity={state.alert.severity}
+                    severity={alert.severity}
                     action={
                         <IconButton
                             aria-label="close"
                             color="inherit"
                             size="small"
-                            onClick={() => setState((prev) => ({ ...prev, alert: { open: false, txt: "" } }))}
+                            onClick={() => setAlert((prev) => ({ ...prev, open: false, txt: "" }))}
                         >
                             <CloseIcon fontSize="inherit" />
                         </IconButton>
                     }
-                >{state.alert.txt}</Alert>
+                >{alert.txt}</Alert>
             </Collapse>
         </>
     );

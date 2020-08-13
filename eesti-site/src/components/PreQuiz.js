@@ -17,6 +17,8 @@ export default function PreQuiz({ onSubmit }) {
                 setTags(tags.data);
             }
             loadTags();
+
+            return () => setTags([]);
         }, [setTags]);
 
     const handleRadioChange = React.useCallback(
@@ -50,13 +52,13 @@ export default function PreQuiz({ onSubmit }) {
     const handleTagsChange = React.useCallback(
         (event) => {
             const value = event.target.value;
-
             setState((prev) => ({ ...prev, tags: value }));
 
         }, [setState]);
 
     const renderTagsSelector = React.useMemo(
         () => {
+            console.log(tags);
             return (
                 <Select
                     value={state.tags}
