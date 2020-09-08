@@ -66,7 +66,7 @@ async function findWord(id, words, isComplexWord) {
     const $ = await request(options);
     const word = { failed: false };
 
-    word.type = $('.my-1').map((i, e) => { return $(e).text(); }).get().join();
+    word.type = $('.my-1').map((i, e) => $(e).text()).get().join();
     const cases = parseWordTitles(word.type);
     for (const field in cases) {
         const searchedCase = $('.morph-word').filter((i, e) => $(e).attr('title').trim().startsWith(cases[field]));

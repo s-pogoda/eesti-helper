@@ -30,7 +30,7 @@ function NewPage() {
 
     const handleRemoveItem = React.useCallback(
         (index) => {
-            setData((prev) => prev.data.filter((e, i) => i !== index));
+            setData((prev) => prev.filter((e, i) => i !== index));
         }, [setData]);
 
     const handleSaveClick = React.useCallback((event) => {

@@ -91,8 +91,7 @@ router.get('/quiz-list', async (req, res) => {
 });
 
 router.post('/update/:id', async (req, res) => {
-    const translation = req.body.translation;
-    const tags = req.body.tags;
+    const { tags, translation } = req.body;
     const query = {};
 
     try {
