@@ -1,6 +1,6 @@
 const ObjectID = require('mongodb').ObjectID;
 const getCollection = require('../database/database');
-const searchInDictionary = require('../logic/dictionary');
+const searchInDictionary = require('../parser/dictionary');
 const Words = {};
 
 const prepareInput = (str) => {
