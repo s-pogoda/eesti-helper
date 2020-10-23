@@ -30,7 +30,7 @@ services:
 
   frontend:
     build: 
-      context: ./eesti-site
+      context: ./spelling-ui
       dockerfile: Dockerfile
     image: eesti-frontend:${FRONTEND_TAG}
     ports:
