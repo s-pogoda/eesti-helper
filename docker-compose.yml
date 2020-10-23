@@ -14,9 +14,9 @@ services:
         aliases:
           - database
 
-  eesti-backend:
+  backend:
     build: 
-      context: ./eesti-helper
+      context: ./spelling-service
       dockerfile: Dockerfile
     image: eesti-backend:${BACKEND_TAG}
     environment:
@@ -28,7 +28,7 @@ services:
       - eesti-internal
       - eesti-external
 
-  eesti-frontend:
+  frontend:
     build: 
       context: ./eesti-site
       dockerfile: Dockerfile
