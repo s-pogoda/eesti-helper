@@ -25,10 +25,12 @@ const getOptions = (funcName, param) => ({
 });
 
 const getDefinitions = ($, word) => {
-    const firstLvlDefinitions = $('.m').filter((i, e) => $(e).text().replace(/\+/g, '').trim() === word).get();
+    const pattern = '^' + word + '(?!\\+)';
+    const regex = new RegExp(pattern, 'g');
+    const firstLvlDefinitions = $('.m').filter((i, e) => $(e).text().trim().match(regex)).get();
     if (!firstLvlDefinitions.length) {
         // search and return definitions from second level
-        return $('.d').filter((i, e) => $(e).text().replace(/\+/g, '').trim() === word).get();
+        return $('.d').filter((i, e) => $(e).text().trim().match(regex)).get();
     }
     return firstLvlDefinitions;
 };

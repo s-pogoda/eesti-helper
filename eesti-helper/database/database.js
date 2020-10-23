@@ -6,7 +6,7 @@ const dbName = 'words';
 
 async function getDb() {
     if (!client) {
-        if (attempts > 5) {
+        if (attempts > 2) {
             throw new Error("Can't connect to " + configs());
         }
         try {
@@ -14,6 +14,7 @@ async function getDb() {
             client = await MongoClient.connect(configs(), { useUnifiedTopology: true });
             attempts = 0;
         } catch (e) {
+            console.log(e.message)
             attempts++;
             return getDb();
         }
