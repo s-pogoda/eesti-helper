@@ -5,6 +5,8 @@ const logger = require('morgan');
 
 const port = process.env.PORT || 3000;
 const wordsRouter = require('./routes/words');
+const tagsRouter = require('./routes/tags');
+const quizRouter = require('./routes/quiz');
 
 const cors = require('cors');
 const app = express();
@@ -16,6 +18,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use('/words', wordsRouter);
+app.use('/tags', tagsRouter);
+app.use('/quiz', quizRouter);
 
 app.use(function (req, res, next) {
   next(createError(404, "This page does not exist."));

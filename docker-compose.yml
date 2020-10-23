@@ -4,7 +4,7 @@ services:
     image: mongo:latest
     volumes:
       - ./mongo-configs/init_db.js:/docker-entrypoint-initdb.d/init_db.js
-      - /opt/eesti-database:/data/db
+      - /tmp/eesti-database:/data/db
     environment:
       - MONGO_INITDB_DATABASE=words
     expose:
